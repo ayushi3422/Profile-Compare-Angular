@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Angular Profile Comparison Component Library - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            min-height: 100vh;
+        }
+
+        .profile-comparison-container {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            width: 100%;
+        }
+
+        .background-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .bg-user-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1494790108755-2616b612b131?w=800&h=800&fit=crop&crop=face') center/cover;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+
+        .bg-user-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=800&fit=crop&crop=face') center/cover;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+
+        .overlay-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(0,0,0,0.7) 0%, 
+                rgba(0,0,0,0.3) 25%,
+                rgba(0,0,0,0.8) 50%,
+                rgba(0,0,0,0.3) 75%,
+                rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 0;
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .profile-section.left {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .profile-section.right {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 280px;
+            position: relative;
+            animation: slideInFromSide 0.8s ease-out;
+        }
+
+        .profile-section.left .profile-card {
+            border-color: rgba(59, 130, 246, 0.4);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .profile-section.right .profile-card {
+            border-color: rgba(236, 72, 153, 0.4);
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-section.right .profile-avatar {
+            background: linear-gradient(135deg, #ec4899, #f97316);
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4);
+        }
+
+        .profile-name {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-info {
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .profile-section.left .info-item {
+            justify-content: flex-end;
+        }
+
+        .interests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .interest-chip {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .interest-chip:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .view-profile-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            margin-top: 1.5rem;
+        }
+
+        .profile-section.right .view-profile-btn {
+            background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4);
+        }
+
+        .view-profile-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.5);
+        }
+
+        .middle-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .connection-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                rgba(59, 130, 246, 0.8) 0%, 
+                rgba(139, 92, 246, 1) 50%, 
+                rgba(236, 72, 153, 0.8) 100%);
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .common-interests-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 30px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            animation: scaleIn 0.8s ease-out 0.4s both;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .common-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .common-interests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            max-width: 400px;
+        }
+
+        .common-interest-chip {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(16, 185, 129, 0.3));
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            border-radius: 25px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .common-interest-chip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .common-interest-chip:hover::before {
+            left: 100%;
+        }
+
+        .common-interest-chip:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
+            border-color: rgba(34, 197, 94, 0.7);
+        }
+
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-icon {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 60%; left: 85%; animation-delay: 2s; }
+        .floating-icon:nth-child(3) { top: 80%; left: 20%; animation-delay: 4s; }
+        .floating-icon:nth-child(4) { top: 30%; left: 80%; animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+
+        .alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .alert-modal {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            color: white;
+            transform: scale(0.7);
+            transition: transform 0.4s ease;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .alert-overlay.show .alert-modal {
+            transform: scale(1);
+        }
+
+        .alert-modal h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert-modal p {
+            font-size: 1.2rem;
+            margin: 0 0 2.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .alert-button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .alert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        /* Mobile First Responsive Design */
+        
+        /* Mobile - Default styles for 320px+ */
+        @media (max-width: 768px) {
+            .profile-comparison-container {
+                min-height: auto;
+                padding: 0;
+            }
+
+            .content-wrapper {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .profile-section {
+                width: 100%;
+                padding: 0;
+                align-items: center;
+                text-align: center;
+                order: 1;
+            }
+
+            .profile-section.left {
+                order: 1;
+                align-items: center;
+                text-align: center;
+            }
+
+            .profile-section.right {
+                order: 3;
+                align-items: center;
+                text-align: center;
+            }
+
+            .middle-section {
+                order: 2;
+                padding: 1rem;
+                width: 100%;
+            }
+
+            .profile-card {
+                width: 100%;
+                max-width: 350px;
+                margin: 0 auto;
+                padding: 1.5rem;
+                border-radius: 20px;
+            }
+
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .profile-name {
+                font-size: 1.6rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .info-item {
+                justify-content: center;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .interests-list {
+                max-height: 180px;
+                gap: 0.4rem;
+            }
+
+            .interest-chip {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                border-radius: 15px;
+            }
+
+            .view-profile-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+                margin-top: 1rem;
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .connection-line {
+                display: none;
+            }
+
+            .common-interests-container {
+                padding: 1.5rem;
+                border-radius: 20px;
+                max-width: 350px;
+                margin: 0 auto;
+            }
+
+            .common-title {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+
+            .common-interests-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                max-width: none;
+            }
+
+            .common-interest-chip {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
+                border-radius: 15px;
+            }
+
+            .bg-user-left, .bg-user-right {
+                width: 100%;
+                height: 33.33%;
+            }
+
+            .bg-user-left {
+                top: 0;
+            }
+
+            .bg-user-right {
+                top: 66.66%;
+            }
+
+            .floating-icons {
+                display: none;
+            }
+
+            .overlay-gradient {
+                background: linear-gradient(180deg, 
+                    rgba(0,0,0,0.7) 0%, 
+                    rgba(0,0,0,0.3) 33.33%,
+                    rgba(0,0,0,0.8) 50%,
+                    rgba(0,0,0,0.3) 66.66%,
+                    rgba(0,0,0,0.7) 100%);
+            }
+        }
+
+        /* Small Mobile - 375px and below */
+        @media (max-width: 375px) {
+            .content-wrapper {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .profile-card {
+                padding: 1.25rem;
+                max-width: 100%;
+            }
+
+            .profile-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8rem;
+            }
+
+            .profile-name {
+                font-size: 1.4rem;
+            }
+
+            .common-interests-container {
+                padding: 1.25rem;
+            }
+
+            .common-title {
+                font-size: 1.2rem;
+            }
+
+            .common-interests-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .alert-modal {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .alert-modal h3 {
+                font-size: 1.5rem;
+            }
+
+            .alert-modal p {
+                font-size: 1rem;
+            }
+        }
+
+        /* Tiny Mobile - 320px and below */
+        @media (max-width: 320px) {
+            .content-wrapper {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+
+            .profile-card {
+                padding: 1rem;
+            }
+
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .profile-name {
+                font-size: 1.3rem;
+            }
+
+            .interest-chip {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .common-interests-container {
+                padding: 1rem;
+            }
+
+            .common-interest-chip {
+                padding: 0.5rem 0.6rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Large screens - restore desktop layout */
+        @media (min-width: 769px) {
+            .content-wrapper {
+                display: grid;
+                grid-template-columns: 350px 1fr 350px;
+                height: 100vh;
+                gap: 0;
+                padding: 0;
+            }
+
+            .profile-section {
+                order: initial;
+                padding: 2rem;
+            }
+
+            .profile-section.left {
+                align-items: flex-end;
+                text-align: right;
+            }
+
+            .profile-section.right {
+                align-items: flex-start;
+                text-align: left;
+                order: initial;
+            }
+
+            .middle-section {
+                order: initial;
+                padding: 2rem;
+            }
+
+            .connection-line {
+                display: block;
+            }
+
+            .bg-user-left, .bg-user-right {
+                width: 50%;
+                height: 100%;
+            }
+
+            .bg-user-left {
+                top: 0;
+            }
+
+            .bg-user-right {
+                top: 0;
+            }
+
+            .overlay-gradient {
+                background: linear-gradient(90deg, 
+                    rgba(0,0,0,0.7) 0%, 
+                    rgba(0,0,0,0.3) 25%,
+                    rgba(0,0,0,0.8) 50%,
+                    rgba(0,0,0,0.3) 75%,
+                    rgba(0,0,0,0.7) 100%);
+            }
+
+            .floating-icons {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-comparison-container">
+        <!-- Background Images -->
+        <div class="background-images">
+            <div class="bg-user-left"></div>
+            <div class="bg-user-right"></div>
+            <div class="overlay-gradient"></div>
+        </div>
+
+        <!-- Floating Icons -->
+        <div class="floating-icons">
+            <div class="floating-icon">💫</div>
+            <div class="floating-icon">✨</div>
+            <div class="floating-icon">🌟</div>
+            <div class="floating-icon">💎</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Left Profile Section -->
+            <div class="profile-section left">
+                <div class="profile-card">
+                    <div class="profile-avatar">S</div>
+                    <h3 class="profile-name">Sushi</h3>
+                    
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <span>University</span>
+                            <span>🏫</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Albany, NY</span>
+                            <span>📍</span>
+                        </div>
+                    </div>
+
+                    <div class="interests-section">
+                        <div class="interests-list">
+                            <div class="interest-chip">Pina Coladas</div>
+                            <div class="interest-chip">Subway</div>
+                            <div class="interest-chip">Gardening</div>
+                            <div class="interest-chip">Baseball</div>
+                            <div class="interest-chip">Motorcross</div>
+                            <div class="interest-chip">Bears</div>
+                            <div class="interest-chip">MMA</div>
+                            <div class="interest-chip">Biology</div>
+                            <div class="interest-chip">Masters Degree</div>
+                        </div>
+                    </div>
+
+                    <button class="view-profile-btn" onclick="showAlert('Sushi')">
+                        View Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Section - Common Interests -->
+            <div class="middle-section">
+                <div class="connection-line"></div>
+                <div class="common-interests-container">
+                    <h2 class="common-title">🤝 Similar Interests</h2>
+                    <div class="common-interests-grid">
+                        <div class="common-interest-chip">Japanese</div>
+                        <div class="common-interest-chip">University</div>
+                        <div class="common-interest-chip">Albany, NY</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Profile Section -->
+            <div class="profile-section right">
+                <div class="profile-card">
+                    <div class="profile-avatar">P</div>
+                    <h3 class="profile-name">Pizza</h3>
+                    
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <span>🏫</span>
+                            <span>University</span>
+                        </div>
+                        <div class="info-item">
+                            <span>📍</span>
+                            <span>Albany, NY</span>
+                        </div>
+                    </div>
+
+                    <div class="interests-section">
+                        <div class="interests-list">
+                            <div class="interest-chip">Pizza</div>
+                            <div class="interest-chip">Volleyball</div>
+                            <div class="interest-chip">Japanese</div>
+                            <div class="interest-chip">University</div>
+                            <div class="interest-chip">Albany, NY</div>
+                        </div>
+                    </div>
+
+                    <button class="view-profile-btn" onclick="showAlert('Pizza')">
+                        View Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="alert-overlay" id="alertOverlay" onclick="hideAlert()">
+        <div class="alert-modal">
+            <h3>✅ Profile Navigation</h3>
+            <p id="alertMessage">You have been routed to a profile page</p>
+            <button class="alert-button" onclick="hideAlert()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(profileName) {
+            const alertOverlay = document.getElementById('alertOverlay');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = `You have been routed to ${profileName}'s profile page`;
+            alertOverlay.classList.add('show');
+        }
+
+        function hideAlert() {
+            const alertOverlay = document.getElementById('alertOverlay');
+            alertOverlay.classList.remove('show');
+        }
+
+        // Enhanced interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile card hover effects
+            const profileCards = document.querySelectorAll('.profile-card');
+            profileCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                    this.style.boxShadow = '0 25px 50px rgba(139, 92, 246, 0.4)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = '';
+                });
+            });
+
+            // Interest chip interactions
+            const interestChips = document.querySelectorAll('.interest-chip');
+            interestChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Common interests pulse effect
+            const commonChips = document.querySelectorAll('.common-interest-chip');
+            commonChips.forEach((chip, index) => {
+                setTimeout(() => {
+                    chip.style.animation = 'scaleIn 0.6s ease-out forwards';
+                }, index * 200);
+            });
+
+            // Parallax effect for background
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const bgElements = document.querySelectorAll('.bg-user-left, .bg-user-right');
+                bgElements.forEach(bg => {
+                    bg.style.transform = `translateY(${scrolled * 0.3}px)`;
+                });
+            });
+
+            // Connection line animation
+            const connectionLine = document.querySelector('.connection-line');
+            if (connectionLine) {
+                setTimeout(() => {
+                    connectionLine.style.animation = 'drawLine 1.5s ease-out forwards';
+                }, 800);
+            }
+
+            // Add draw line animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes drawLine {
+                    from { width: 0; }
+                    to { width: 100%; }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
